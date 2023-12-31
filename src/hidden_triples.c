@@ -17,6 +17,7 @@ bool is_hidden_triple(Cell **p_cells, int value1, int value2, int value3){
 }
 
 bool is_in_cell_ht(Cell *p_cells, int value1, int value2, int value3){
+    
     return ((is_candidate(p_cells, value1) && is_candidate(p_cells, value2) && is_candidate(p_cells, value3))||
             (is_candidate(p_cells, value1) && is_candidate(p_cells, value2))||
             (is_candidate(p_cells, value2) && is_candidate(p_cells, value3))||
@@ -38,13 +39,45 @@ int find_hidden_triple_values(Cell **p_cells, int *hidden_triple_values){
             free(candidate_array);
         }
     }
-    for (int i = 0; i < BOARD_SIZE; i++){
+    for (int i = 0; i < BOARD_SIZE; i++)
         if (hidden_triple_array[i] == 3||hidden_triple_array[i] == 2){
                 hidden_triple_values[hidden_triple_count++] = i+1;                  
         }
+    int valid=1;
+    if(hidden_triple_count==3){
+        for (int i = 0; i <3; i++)
+        {
+            switch (i)
+            {
+            case 0:
+                for(int j=0; j<BOARD_SIZE;j++)
+                    if((is_candidate(p_cells[j],hidden_triple_values[0]))&&!((is_candidate(p_cells[j],hidden_triple_values[1]))||(is_candidate(p_cells[j],hidden_triple_values[2]))))
+                        valid=0;
+                break;
+            case 1:
+                for(int j=0; j<BOARD_SIZE;j++)
+                    if((is_candidate(p_cells[j],hidden_triple_values[1]))&&!((is_candidate(p_cells[j],hidden_triple_values[0]))||(is_candidate(p_cells[j],hidden_triple_values[2]))))
+                        valid=0;
+                break;
+            case 2:
+                for(int j=0; j<BOARD_SIZE;j++)
+                    if((is_candidate(p_cells[j],hidden_triple_values[2]))&&!((is_candidate(p_cells[j],hidden_triple_values[0]))||(is_candidate(p_cells[j],hidden_triple_values[1]))))
+                        valid=0;
+                break;
+            default:
+                break;
+            }
+        }
+        
     }
-    return hidden_triple_count;
+    
+    
+        
+    if (valid)
+        return hidden_triple_count;
+    return 0;
 }
+
 
 void find_hidden_triple(Cell **p_cells, HiddenTriple *p_hidden_triple, int *p_counter)
 {
@@ -88,28 +121,31 @@ int hidden_triples(SudokuBoard *p_board)
     HiddenTriple p_hidden_triple[BOARD_SIZE*BOARD_SIZE];
     int p_counter = 0;
     for (int i = 0; i< 1; i++){
-        //find_hidden_triple(p_board->p_cols[i], p_hidden_triple, &p_counter);
+        find_hidden_triple(p_board->p_cols[i], p_hidden_triple, &p_counter);
         find_hidden_triple(p_board->p_rows[i], p_hidden_triple, &p_counter);
-        //find_hidden_triple(p_board->p_boxes[i], p_hidden_triple, &p_counter);
+        find_hidden_triple(p_board->p_boxes[i], p_hidden_triple, &p_counter);
     }
     int repeated = p_counter;
-    for (int i = 0; i < p_counter; i++){
-    int count = 0;
-    Cell **p_cells = p_hidden_triple[i].p_cells;
-    int* candidate_array = get_candidates(*p_cells);
-    int num_candidates = (*p_cells)->num_candidates;
+    for (int i = 0; i < p_counter; i++)
+    {
+        int count = 0;
+        Cell **p_cells = p_hidden_triple[i].p_cells;
+        for(int j=0;j<3;j++)
+            {
+            int* candidate_array = get_candidates(p_cells[j]);
+            int num_candidates = (p_cells[j])->num_candidates;
 
-    for (int index = 0; index < num_candidates; index++){
-        if ((candidate_array[index] != p_hidden_triple[i].value1) && 
-        (candidate_array[index] != p_hidden_triple[i].value2) && 
-        (candidate_array[index] != p_hidden_triple[i].value3)){
-            unset_candidate(*p_cells, candidate_array[index]);
-            count = 1;
-        }
+            for (int index = 0; index < num_candidates; index++){
+                if ((candidate_array[index] != p_hidden_triple[i].value1) && 
+                (candidate_array[index] != p_hidden_triple[i].value2) && 
+                (candidate_array[index] != p_hidden_triple[i].value3)){
+                    unset_candidate(p_cells[j], candidate_array[index]);
+                    count = 1;
+                }
+            }
+            free(candidate_array);
+            }
+        repeated -= count;
     }
-
-    repeated -= count;
-    free(candidate_array);
-}
     return (p_counter - repeated);
 }
