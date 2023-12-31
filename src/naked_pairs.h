@@ -13,7 +13,7 @@ typedef struct NakedPair_impl {
 
 bool is_naked_pair(Cell **p_cells, int value1, int value2);
 bool is_in_naked_pair_cell(NakedPair *p_array, Cell *p);
-bool is_naked_cell(Cell *p_cell, int value1, int value2);
+bool is_naked_cell_np(Cell *p_cell, int value1, int value2);
 
 int find_naked_pair_values(Cell **p_cells, int *naked_pair_values);
 

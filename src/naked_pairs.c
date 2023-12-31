@@ -2,6 +2,7 @@
 #include "sudoku.h"
 #include <stdlib.h>
 #include <stdio.h>
+
 bool is_naked_pair(Cell **p_cells, int value1, int value2){
     int count = 0;
     for (int i =0; i < BOARD_SIZE; i++){
